@@ -1,0 +1,77 @@
+import { TelegramClient } from 'telegram'
+import { Logger, LogLevel } from 'telegram/extensions/Logger'
+import { StringSession } from 'telegram/sessions'
+import {
+  normalizeCallbackable,
+  type Awaitable,
+  type Callbackable,
+} from '../utils/general'
+
+export interface CoreOptions {
+  apiId: number
+  apiHash: string
+  phoneNumber: string
+  onPhoneCode: Callbackable<
+    Awaitable<string | number>,
+    [isCodeViaApp?: boolean]
+  >
+  password?: Callbackable<Awaitable<string>, [hint?: string]>
+  session?: string
+  logLevel?: LogLevel
+}
+
+export async function createCore(options: CoreOptions): Promise<Core> {
+  const core = new Core(options)
+  await core.client.connect()
+  return core
+}
+
+export class Core {
+  options: CoreOptions
+  client: TelegramClient
+  session: StringSession
+
+  constructor(options: CoreOptions) {
+    this.options = options
+    this.session = new StringSession(options.session || '')
+    const logger = new Logger(options.logLevel || LogLevel.ERROR)
+    this.client = new TelegramClient(
+      this.session,
+      this.options.apiId,
+      this.options.apiHash,
+      { baseLogger: logger },
+    )
+  }
+
+  async signIn(): Promise<string> {
+    const signed = await this.client.isUserAuthorized()
+    if (!signed) {
+      const credentials = {
+        apiId: this.client.apiId,
+        apiHash: this.client.apiHash,
+      }
+      const { options } = this
+      await this.client.signInUser(credentials, {
+        phoneNumber: this.options.phoneNumber,
+        async phoneCode(isCodeViaApp?: boolean) {
+          const code = await normalizeCallbackable(options.onPhoneCode)(
+            isCodeViaApp,
+          )
+          return String(code)
+        },
+        async password(hint) {
+          if (!options.password) throw new Error('Password is required')
+          return await normalizeCallbackable(options.password)(hint)
+        },
+        onError(err: Error) {
+          console.error(err)
+        },
+      })
+    }
+    return this.session.save()
+  }
+
+  [Symbol.asyncDispose](): Promise<void> {
+    return this.client.destroy()
+  }
+}
