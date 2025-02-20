@@ -2,18 +2,18 @@ import process from 'node:process'
 import { underline } from 'ansis'
 import consola from 'consola'
 import { eq } from 'drizzle-orm'
-import { readConfig, saveConfig } from '../config'
+import { loadConfig } from '../config'
 import { createCore } from '../core'
 import { db } from '../db'
 import { messagesTable } from '../db/schema'
 
 async function main() {
-  const config = await readConfig()
+  const config = await loadConfig()
   await using core = await createCore({
-    apiId: config.apiId,
-    apiHash: config.apiHash,
-    phoneNumber: config.phoneNumber,
-    session: config.session,
+    apiId: config.auth.apiId,
+    apiHash: config.auth.apiHash,
+    phoneNumber: config.auth.phoneNumber,
+    session: config.auth.session,
     onPhoneCode() {
       return consola.prompt('Enter the code you received:', { type: 'text' })
     },
@@ -25,9 +25,6 @@ async function main() {
   })
 
   await core.signIn()
-  config.session = core.session.save()
-  await saveConfig()
-
   consola.success('You are now signed in!')
 
   const dialogs = await Array.fromAsync(core.client.iterDialogs())

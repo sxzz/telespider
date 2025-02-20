@@ -1,5 +1,5 @@
-export const foo = 'foo'
+import type { Config } from './config'
 
-export function fn(): void {
-  return
+export function defineConfig(config: Config) {
+  return config
 }

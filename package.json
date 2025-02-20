@@ -46,8 +46,11 @@
     "cac": "^6.7.14",
     "consola": "^3.4.0",
     "debug": "^4.4.0",
+    "defu": "^6.1.4",
+    "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.3",
-    "telegram": "^2.26.22"
+    "telegram": "^2.26.22",
+    "unconfig": "^7.0.0"
   },
   "devDependencies": {
     "@sxzz/eslint-config": "^5.1.1",
@@ -61,6 +64,7 @@
     "prettier": "^3.5.1",
     "tsdown": "^0.6.0",
     "tsx": "^4.19.3",
+    "type-fest": "^4.35.0",
     "typescript": "^5.7.3",
     "vitest": "^3.0.6"
   },

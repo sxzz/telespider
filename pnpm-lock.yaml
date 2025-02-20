@@ -26,12 +26,21 @@ importers:
       debug:
         specifier: ^4.4.0
         version: 4.4.0
+      defu:
+        specifier: ^6.1.4
+        version: 6.1.4
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.4.7
       drizzle-orm:
         specifier: ^0.39.3
         version: 0.39.3(@libsql/client@0.14.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       telegram:
         specifier: ^2.26.22
         version: 2.26.22
+      unconfig:
+        specifier: ^7.0.0
+        version: 7.0.0
     devDependencies:
       '@sxzz/eslint-config':
         specifier: ^5.1.1
@@ -66,6 +75,9 @@ importers:
       tsx:
         specifier: ^4.19.3
         version: 4.19.3
+      type-fest:
+        specifier: ^4.35.0
+        version: 4.35.0
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
@@ -2760,6 +2772,10 @@ packages:
   type-fest@0.8.1:
     resolution: {integrity: sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==}
     engines: {node: '>=8'}
+
+  type-fest@4.35.0:
+    resolution: {integrity: sha512-2/AwEFQDFEy30iOLjrvHDIH7e4HEWH+f1Yl1bI5XMqzuoCUqwYCdxachgsgv0og/JdVZUhbfjcJAoHj5L1753A==}
+    engines: {node: '>=16'}
 
   type@2.7.3:
     resolution: {integrity: sha512-8j+1QmAbPvLZow5Qpi6NCaN8FB60p/6x8/vfNqOk/hC+HuvFZhL4+WfekuhQLiqFZXOgQdrs3B+XxEmCc6b3FQ==}
@@ -5690,6 +5706,8 @@ snapshots:
   type-fest@0.6.0: {}
 
   type-fest@0.8.1: {}
+
+  type-fest@4.35.0: {}
 
   type@2.7.3: {}
 

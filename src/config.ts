@@ -1,52 +1,43 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { homedir } from 'node:os'
-import { resolve } from 'node:path'
-import consola from 'consola'
+import process from 'node:process'
+import { defu } from 'defu'
+import dotenv from 'dotenv'
+import { loadConfig as unconfig } from 'unconfig'
+import type { RequiredDeep } from 'type-fest'
 
-export interface AppConfig {
-  apiId: number
-  apiHash: string
-  phoneNumber: string
-  session?: string
-}
+dotenv.config({
+  path: ['.env.local', '.env'],
+})
 
-const configDir = resolve(homedir(), '.config')
-const configPath = resolve(configDir, '.telespider.json')
-
-let globalConfig: AppConfig
-
-export function getConfig(): AppConfig {
-  return globalConfig
-}
-
-export async function readConfig(): Promise<AppConfig> {
-  const raw = await readFile(configPath, 'utf8').catch(() => null)
-  if (!raw) return initConfig()
-  return (globalConfig = JSON.parse(raw))
-}
-
-export async function saveConfig(
-  config: AppConfig = globalConfig,
-): Promise<void> {
-  await mkdir(configDir, { recursive: true })
-  await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, 'utf8')
-  globalConfig = config
-}
-
-export async function initConfig(): Promise<AppConfig> {
-  const appId = await consola.prompt('Enter your API ID:', { type: 'text' })
-  const appHash = await consola.prompt('Enter your API Hash:', {
-    type: 'text',
-  })
-  const phoneNumber = await consola.prompt('Enter your phone number:', {
-    type: 'text',
-  })
-  const config: AppConfig = {
-    apiId: Number(appId),
-    apiHash: appHash,
-    phoneNumber,
+export interface Config {
+  auth?: {
+    apiId?: number
+    apiHash?: string
+    phoneNumber?: string
+    session?: string
   }
-  await saveConfig(config)
-  consola.success('Configuration initialized successfully!')
-  return (globalConfig = config)
+}
+
+export type ConfigResolved = RequiredDeep<Config>
+
+const defaultConfig: ConfigResolved = {
+  auth: {
+    apiId: +(process.env.TELESPIDER_AUTH_API_ID ?? 0),
+    apiHash: process.env.TELESPIDER_AUTH_API_HASH ?? '',
+    phoneNumber: process.env.TELESPIDER_AUTH_PHONE_NUMBER ?? '',
+    session: process.env.TELESPIDER_AUTH_SESSION ?? '',
+  },
+}
+
+export async function loadConfig(): Promise<ConfigResolved> {
+  const { config } = await unconfig<Config>({
+    sources: [
+      {
+        files: 'telespider.config',
+        extensions: ['ts', 'mts', 'cts', 'js', 'mjs', 'cjs', 'json', ''],
+      },
+    ],
+    cwd: process.cwd(),
+    defaults: {},
+  })
+  return defu(config, defaultConfig)
 }
