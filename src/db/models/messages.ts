@@ -7,16 +7,16 @@ export const messagesTable = pgTable(
   'messages',
   {
     id: text().primaryKey(),
-    entityId: text().notNull(),
+    peerId: text().notNull(),
+    peerName: text().notNull(),
     messageId: text().notNull(),
-    chatName: text().notNull(),
     fromUserId: text(),
     fromUserDisplayName: text(),
     text: text().notNull(),
     raw: jsonb().notNull().$type<Api.Message>(),
     ...timestamps,
   },
-  (table) => [index('entity_id_idx').on(table.entityId)],
+  (table) => [index('peer_id_idx').on(table.peerId)],
 )
 
 export async function insertMessages(

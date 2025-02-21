@@ -2,7 +2,6 @@ import assert from 'node:assert'
 import process from 'node:process'
 import consola from 'consola'
 import { Api } from 'telegram'
-import { getEntityDisplayName, getEntityId } from '../core/utils'
 import { insertMessages, type messagesTable } from '../db/models'
 import { convertApiMessage } from '../services/message'
 import { initCli } from './init'
@@ -48,9 +47,6 @@ async function main() {
     initial: false,
   })
 
-  const entityId = getEntityId(entity).toString()
-  const chatName = getEntityDisplayName(entity)
-
   // const earliestMessage = reverse
   //   ? undefined
   //   : await getEarliestMessage(entityId)
@@ -63,7 +59,7 @@ async function main() {
       // offsetDate: earliestMessage?.raw.date,
       reverse,
     })) {
-      messages.push(convertApiMessage(entityId, chatName, msg))
+      messages.push(convertApiMessage(entity, msg))
 
       i++
       if (messages.length >= 500) {

@@ -9,3 +9,14 @@ export function normalizeCallbackable<R, A extends any[] = []>(
   }
   return () => value
 }
+
+// eslint-disable-next-line unused-imports/no-unused-vars
+export function assertUnreachable(x: never): never {
+  throw new Error("Didn't expect to get here")
+}
+
+export function omitUndefined<T extends Record<string, any>>(obj: T): T {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, value]) => value != null),
+  ) as any
+}

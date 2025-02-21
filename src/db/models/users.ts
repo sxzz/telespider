@@ -1,29 +1,39 @@
 import { eq } from 'drizzle-orm'
-import { pgTable, text } from 'drizzle-orm/pg-core'
+import { jsonb, pgTable, text } from 'drizzle-orm/pg-core'
 import { db } from '..'
+import { omitUndefined } from '../../utils/general'
 import { timestamps } from './common'
+import type { Entity } from 'telegram/define'
 
-export const usersTable = pgTable('users', {
+export const entitiesTable = pgTable('users', {
   id: text().primaryKey(),
   username: text(),
   displayName: text().notNull(),
+  raw: jsonb().notNull().$type<Entity>(),
   ...timestamps,
 })
 
-export type User = typeof usersTable.$inferSelect
-export type UserInsert = typeof usersTable.$inferInsert
+export type DbEntity = typeof entitiesTable.$inferSelect
+export type DbEntityInsert = typeof entitiesTable.$inferInsert
 
-export async function queryUser(id: string): Promise<User | undefined> {
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, id))
+export async function queryDbEntity(id: string): Promise<DbEntity | undefined> {
+  const [user] = await db
+    .select()
+    .from(entitiesTable)
+    .where(eq(entitiesTable.id, id))
   return user
 }
 
-export async function upsertUser(user: UserInsert): Promise<void> {
+export async function upsertDbEntity(user: DbEntityInsert): Promise<void> {
   await db
-    .insert(usersTable)
+    .insert(entitiesTable)
     .values(user)
     .onConflictDoUpdate({
-      target: usersTable.id,
-      set: { updatedAt: new Date() },
+      target: entitiesTable.id,
+      set: omitUndefined({
+        username: user.username,
+        displayName: user.displayName,
+        updatedAt: new Date(),
+      }),
     })
 }
