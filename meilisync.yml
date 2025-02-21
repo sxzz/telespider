@@ -1,0 +1,19 @@
+debug: true
+progress:
+  type: file
+source:
+  type: postgres
+  host: 127.0.0.1
+  port: 5432
+  user: postgres
+  password:
+  database: telespider
+meilisearch:
+  api_url: http://127.0.0.1:7700
+  api_key: masterKey
+  insert_size: 1000
+  insert_interval: 10
+sync:
+  - table: messages
+    index: messages
+    full: true

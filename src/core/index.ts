@@ -6,6 +6,7 @@ import {
   type Awaitable,
   type Callbackable,
 } from '../utils/general'
+import type { UserAuthParams } from 'telegram/client/auth'
 
 export interface CoreOptions {
   apiId: number
@@ -30,6 +31,7 @@ export class Core {
   options: CoreOptions
   client: TelegramClient
   session: StringSession
+  authParams: UserAuthParams
 
   constructor(options: CoreOptions) {
     this.options = options
@@ -41,6 +43,22 @@ export class Core {
       this.options.apiHash,
       { baseLogger: logger },
     )
+    this.authParams = {
+      phoneNumber: options.phoneNumber,
+      async phoneCode(isCodeViaApp?: boolean) {
+        const code = await normalizeCallbackable(options.onPhoneCode)(
+          isCodeViaApp,
+        )
+        return String(code)
+      },
+      async password(hint) {
+        if (!options.password) throw new Error('Password is required')
+        return await normalizeCallbackable(options.password)(hint)
+      },
+      onError(err: Error) {
+        console.error(err)
+      },
+    }
   }
 
   async signIn(): Promise<string> {
@@ -50,23 +68,7 @@ export class Core {
         apiId: this.client.apiId,
         apiHash: this.client.apiHash,
       }
-      const { options } = this
-      await this.client.signInUser(credentials, {
-        phoneNumber: this.options.phoneNumber,
-        async phoneCode(isCodeViaApp?: boolean) {
-          const code = await normalizeCallbackable(options.onPhoneCode)(
-            isCodeViaApp,
-          )
-          return String(code)
-        },
-        async password(hint) {
-          if (!options.password) throw new Error('Password is required')
-          return await normalizeCallbackable(options.password)(hint)
-        },
-        onError(err: Error) {
-          console.error(err)
-        },
-      })
+      await this.client.signInUser(credentials, this.authParams)
     }
     return this.session.save()
   }

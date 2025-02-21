@@ -6,5 +6,4 @@ dist
 .eslintcache
 *.env.local
 
-data.db
 data.ms

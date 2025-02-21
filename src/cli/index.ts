@@ -1,31 +1,17 @@
+import assert from 'node:assert'
 import process from 'node:process'
-import { underline } from 'ansis'
 import consola from 'consola'
-import { eq } from 'drizzle-orm'
-import { loadConfig } from '../config'
-import { createCore } from '../core'
-import { db } from '../db'
-import { messagesTable } from '../db/schema'
+import { Api } from 'telegram'
+import { getEntityDisplayName, getEntityId } from '../core/utils'
+import { insertMessages, type messagesTable } from '../db/models'
+import { convertApiMessage } from '../services/message'
+import { initCli } from './init'
+
+main()
 
 async function main() {
-  const config = await loadConfig()
-  await using core = await createCore({
-    apiId: config.auth.apiId,
-    apiHash: config.auth.apiHash,
-    phoneNumber: config.auth.phoneNumber,
-    session: config.auth.session,
-    onPhoneCode() {
-      return consola.prompt('Enter the code you received:', { type: 'text' })
-    },
-    password(hint) {
-      return consola.prompt(`Enter your password (hint: ${underline(hint)}):`, {
-        type: 'text',
-      })
-    },
-  })
-
-  await core.signIn()
-  consola.success('You are now signed in!')
+  await using context = await initCli()
+  const { core } = context
 
   const dialogs = await Array.fromAsync(core.client.iterDialogs())
   const idx = await consola.prompt('Select a dialog:', {
@@ -35,48 +21,80 @@ async function main() {
       value: String(i),
     })),
   })
+
   if (idx == null) return
   const dialog = dialogs[Number(idx)]
+
+  let entity = dialog.entity
+  assert(entity)
+  if (
+    entity?.className === 'Channel' &&
+    (await consola.prompt('Get linked group?', {
+      type: 'confirm',
+      initial: false,
+    }))
+  ) {
+    const result = await core.client.invoke(
+      new Api.channels.GetFullChannel({ channel: dialog.entity }),
+    )
+    assert(result.fullChat.className === 'ChannelFull')
+    if (result.fullChat.linkedChatId) {
+      entity = await core.client.getEntity(result.fullChat.linkedChatId)
+    }
+  }
 
   const reverse = await consola.prompt('Reverse?', {
     type: 'confirm',
     initial: false,
   })
 
+  const entityId = getEntityId(entity).toString()
+  const chatName = getEntityDisplayName(entity)
+
+  // const earliestMessage = reverse
+  //   ? undefined
+  //   : await getEarliestMessage(entityId)
+
+  let messages: (typeof messagesTable.$inferInsert)[] = []
   let i = 0
-  for await (const msg of core.client.iterMessages(dialog.entity, {
-    reverse,
-  })) {
-    const peerId = await core.client.getPeerId(msg.peerId)
-    const id = `${peerId}:${msg.id}`
 
-    const count = await db.$count(messagesTable, eq(messagesTable.id, id))
-    if (count > 0) continue
+  try {
+    for await (const msg of core.client.iterMessages(entity, {
+      // offsetDate: earliestMessage?.raw.date,
+      reverse,
+    })) {
+      messages.push(convertApiMessage(entityId, chatName, msg))
 
-    const media =
-      msg.media && msg.media.className !== 'MessageMediaWebPage'
-        ? await core.client.downloadMedia(msg.media)
-        : undefined
-    const user: typeof messagesTable.$inferInsert = {
-      id,
-      peerId,
-      messageId: msg.id,
-      text: msg.text,
-      data: msg,
-      media,
+      i++
+      if (messages.length >= 500) {
+        await commit()
+        const shouldContinue = await consola.prompt(
+          `Saved ${i} messages. Press Enter to continue:`,
+          { type: 'confirm' },
+        )
+        if (!shouldContinue) break
+      }
     }
-    await db.insert(messagesTable).values(user)
-
-    i++
-    if (i % 500 === 0) {
-      const shouldContinue = await consola.prompt('Press Enter to continue:', {
-        type: 'confirm',
-      })
-      if (!shouldContinue) break
-    }
+  } catch (error: any) {
+    console.error(error)
   }
+  await commit()
 
   process.exit(0)
+
+  async function commit() {
+    if (!messages.length) return
+    await insertMessages(messages)
+    messages = []
+  }
 }
 
-main()
+// async function getEarliestMessage(entityId: string) {
+//   const [first] = await db
+//     .select()
+//     .from(messagesTable)
+//     .where(eq(messagesTable.entityId, String(entityId)))
+//     .orderBy(asc(messagesTable.messageId))
+//     .limit(1)
+//   return first as typeof messagesTable.$inferSelect | undefined
+// }
