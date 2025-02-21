@@ -1,4 +1,4 @@
-import { index, jsonb, pgTable, text } from 'drizzle-orm/pg-core'
+import { index, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { db, indexer } from '..'
 import { timestamps } from './common'
 import type { Api } from 'telegram'
@@ -13,10 +13,16 @@ export const messageTable = pgTable(
     fromUserId: text(),
     fromUserDisplayName: text(),
     text: text().notNull(),
+    sentAt: timestamp(),
     raw: jsonb().notNull().$type<Api.Message>(),
     ...timestamps,
   },
-  (table) => [index('peer_id_idx').on(table.peerId)],
+  (table) => [
+    index('peer_id_idx').on(table.peerId),
+    index('from_user_id_idx').on(table.fromUserId),
+    index('from_user_display_name_idx').on(table.fromUserDisplayName),
+    index('sent_at_idx').on(table.sentAt),
+  ],
 )
 
 export async function insertMessages(

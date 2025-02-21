@@ -3,7 +3,7 @@ import { NewMessage } from 'telegram/events'
 import { getPeerId } from 'telegram/Utils'
 import { insertMessages } from '../db/models'
 import { queryDbEntity } from '../db/models/entity'
-import { getDbEntityRaw, registerEntity } from '../services/enitity'
+import { getDbEntityRaw, registerEntities } from '../services/enitity'
 import { convertApiMessage } from '../services/message'
 import { initCli } from './init'
 
@@ -30,7 +30,7 @@ async function main() {
         }),
       )
       if (messages.className === 'messages.MessagesNotModified') return
-      await registerEntity(messages.users)
+      await registerEntities(messages.users)
       const entity = messages.users.find((user) => user.id.eq(peerId))
       peerEntity = entity
     }

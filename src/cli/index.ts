@@ -63,12 +63,14 @@ async function main() {
 
       i++
       if (messages.length >= 500) {
+        console.info(`Saved ${i} messages in total.`)
         await commit()
-        const shouldContinue = await consola.prompt(
-          `Saved ${i} messages. Press Enter to continue:`,
-          { type: 'confirm' },
-        )
-        if (!shouldContinue) break
+
+        //   const shouldContinue = await consola.prompt(
+        //     `Saved ${i} messages. Press Enter to continue:`,
+        //     { type: 'confirm' },
+        //   )
+        //   if (!shouldContinue) break
       }
     }
   } catch (error: any) {

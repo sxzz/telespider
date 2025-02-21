@@ -12,13 +12,18 @@ export function getEntityUsername(entity: Entity): string | undefined {
   return undefined
 }
 
-export async function fetchEntityAvatar(
-  core: Core,
-  entity: Entity,
-): Promise<[id: string, photo: Buffer | undefined] | undefined> {
+export function getEntityAvatarId(entity: Entity) {
   if (!('photo' in entity) || !entity.photo || !('photoId' in entity.photo))
     return
-  const photoId = entity.photo.photoId.toString()
+  return entity.photo.photoId
+}
+
+export async function downloadEntityAvatar(
+  core: Core,
+  entity: Entity,
+): Promise<Buffer | undefined> {
+  if (!('photo' in entity) || !entity.photo || !('photoId' in entity.photo))
+    return
   const photo = await core.client.downloadProfilePhoto(entity)
-  return [photoId, photo as Buffer | undefined]
+  return photo as Buffer | undefined
 }

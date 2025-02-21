@@ -20,6 +20,7 @@ export function convertApiMessage(
     fromUserDisplayName: sender && getDisplayName(sender),
     messageId: msg.id.toString(),
     text: msg.text,
+    sentAt: msg.date ? new Date(msg.date * 1000) : undefined,
     raw: msg,
   }
 }

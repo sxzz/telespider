@@ -22,7 +22,11 @@ export async function getLatestAvatar(
   return avatar.data
 }
 
-export async function ensureAvatar(
+export async function hasAvatarId(id: string) {
+  return (await db.$count(entityAvatarTable, eq(entityAvatarTable.id, id))) > 0
+}
+
+export async function insertEntityAvatar(
   id: string,
   userId: string,
   data: string,
