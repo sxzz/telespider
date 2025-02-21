@@ -1,7 +1,7 @@
 import { Api } from 'telegram'
 import { getDisplayName } from 'telegram/Utils'
 import { getEntityUsername } from '../core/utils'
-import { upsertDbEntity, type DbEntity } from '../db/models/users'
+import { upsertDbEntity, type DbEntity } from '../db/models/entity'
 import type { Entity } from 'telegram/define'
 
 export function registerEntity(users: Api.TypeUser[]) {

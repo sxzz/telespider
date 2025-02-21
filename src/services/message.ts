@@ -1,12 +1,12 @@
 import { getDisplayName, getPeerId } from 'telegram/Utils'
-import type { messagesTable } from '../db/models'
+import type { messageTable } from '../db/models'
 import type { Api } from 'telegram'
 import type { Entity } from 'telegram/define'
 
 export function convertApiMessage(
   peer: Entity,
   msg: Api.Message,
-): typeof messagesTable.$inferInsert {
+): typeof messageTable.$inferInsert {
   const id = `${peer.id}_${msg.id}`
   const privateChat =
     msg.fromId && getPeerId(msg.peerId) === getPeerId(msg.fromId)

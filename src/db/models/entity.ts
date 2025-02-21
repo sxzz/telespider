@@ -5,7 +5,7 @@ import { omitUndefined } from '../../utils/general'
 import { timestamps } from './common'
 import type { Entity } from 'telegram/define'
 
-export const entitiesTable = pgTable('users', {
+export const entityTable = pgTable('entity', {
   id: text().primaryKey(),
   username: text(),
   displayName: text().notNull(),
@@ -13,23 +13,23 @@ export const entitiesTable = pgTable('users', {
   ...timestamps,
 })
 
-export type DbEntity = typeof entitiesTable.$inferSelect
-export type DbEntityInsert = typeof entitiesTable.$inferInsert
+export type DbEntity = typeof entityTable.$inferSelect
+export type DbEntityInsert = typeof entityTable.$inferInsert
 
 export async function queryDbEntity(id: string): Promise<DbEntity | undefined> {
   const [user] = await db
     .select()
-    .from(entitiesTable)
-    .where(eq(entitiesTable.id, id))
+    .from(entityTable)
+    .where(eq(entityTable.id, id))
   return user
 }
 
 export async function upsertDbEntity(user: DbEntityInsert): Promise<void> {
   await db
-    .insert(entitiesTable)
+    .insert(entityTable)
     .values(user)
     .onConflictDoUpdate({
-      target: entitiesTable.id,
+      target: entityTable.id,
       set: omitUndefined({
         username: user.username,
         displayName: user.displayName,

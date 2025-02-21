@@ -3,8 +3,8 @@ import { db, indexer } from '..'
 import { timestamps } from './common'
 import type { Api } from 'telegram'
 
-export const messagesTable = pgTable(
-  'messages',
+export const messageTable = pgTable(
+  'message',
   {
     id: text().primaryKey(),
     peerId: text().notNull(),
@@ -20,16 +20,16 @@ export const messagesTable = pgTable(
 )
 
 export async function insertMessages(
-  messages: (typeof messagesTable.$inferInsert)[],
+  messages: (typeof messageTable.$inferInsert)[],
 ) {
   await Promise.all([
     indexer.addDocuments(messages, { primaryKey: 'id' }),
     ...messages.map((msg) =>
       db
-        .insert(messagesTable)
+        .insert(messageTable)
         .values(msg)
         .onConflictDoUpdate({
-          target: messagesTable.id,
+          target: messageTable.id,
           set: {
             ...msg,
             updatedAt: new Date(),

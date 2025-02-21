@@ -2,7 +2,7 @@ import assert from 'node:assert'
 import process from 'node:process'
 import consola from 'consola'
 import { Api } from 'telegram'
-import { insertMessages, type messagesTable } from '../db/models'
+import { insertMessages, type messageTable } from '../db/models'
 import { convertApiMessage } from '../services/message'
 import { initCli } from './init'
 
@@ -51,7 +51,7 @@ async function main() {
   //   ? undefined
   //   : await getEarliestMessage(entityId)
 
-  let messages: (typeof messagesTable.$inferInsert)[] = []
+  let messages: (typeof messageTable.$inferInsert)[] = []
   let i = 0
 
   try {

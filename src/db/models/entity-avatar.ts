@@ -3,7 +3,7 @@ import { pgTable, text } from 'drizzle-orm/pg-core'
 import { db } from '..'
 import { timestamps } from './common'
 
-export const usersAvatarTable = pgTable('users-avatar', {
+export const entityAvatarTable = pgTable('entity-avatar', {
   id: text().primaryKey(),
   userId: text().notNull(),
   data: text().notNull(),
@@ -16,9 +16,9 @@ export async function getLatestAvatar(
 ): Promise<string | undefined> {
   const [avatar] = await db
     .select()
-    .from(usersAvatarTable)
-    .where(eq(usersAvatarTable.userId, userId))
-    .orderBy(desc(usersAvatarTable.createdAt))
+    .from(entityAvatarTable)
+    .where(eq(entityAvatarTable.userId, userId))
+    .orderBy(desc(entityAvatarTable.createdAt))
   return avatar.data
 }
 
@@ -28,7 +28,7 @@ export async function ensureAvatar(
   data: string,
 ): Promise<void> {
   await db
-    .insert(usersAvatarTable)
+    .insert(entityAvatarTable)
     .values({ id, userId, data })
     .onConflictDoNothing()
 }
