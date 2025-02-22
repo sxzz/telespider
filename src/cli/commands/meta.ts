@@ -13,18 +13,36 @@ export async function meta() {
   await using context = await initCli()
   const { core } = context
 
-  const dialogs = await Array.fromAsync(core.client.iterDialogs())
+  const entities = (await Array.fromAsync(core.client.iterDialogs()))
+    .map((dialog) => dialog.entity)
+    .filter((ent) => !!ent)
+  const p = registerEntities(core, entities)
 
-  for (const dialog of dialogs) {
-    if (!dialog.entity) continue
-    await registerEntity(core, dialog.entity)
+  const groups = entities.filter(
+    (ent) => ent?.className !== 'User' && ent?.className !== 'UserEmpty',
+  )
+  const selecteds = await consola.prompt('Select groups and channels', {
+    type: 'multiselect',
+    options: groups.map((grp, i) => ({
+      label: getDisplayName(grp),
+      value: String(i),
+    })),
+  })
+  const selectedGroups = selecteds.map((i) => groups[Number(i)])
+  await p
+  for (const entity of selectedGroups) {
+    await registerGroup(core, entity)
   }
 }
 
-async function registerEntity(core: Core, entity: Entity, isLinked?: boolean) {
+const seen = new Set<string>()
+
+async function registerGroup(core: Core, entity: Entity) {
+  if (seen.has(entity.id.toString())) return
+  seen.add(entity.id.toString())
+
   const entityName = getDisplayName(entity)
   consola.info(`Registering ${entity.className} ${entityName}`)
-  await registerEntities(core, [entity])
 
   const iter = core.client.iterParticipants(entity)
   const participants = await Array.fromAsync(iter).catch(() => {
@@ -37,7 +55,7 @@ async function registerEntity(core: Core, entity: Entity, isLinked?: boolean) {
     await registerEntities(core, [user])
   }
 
-  if (!isLinked && entity.className === 'Channel') {
+  if (entity.className === 'Channel') {
     const result = await core.client.invoke(
       new Api.channels.GetFullChannel({ channel: entity }),
     )
@@ -48,7 +66,7 @@ async function registerEntity(core: Core, entity: Entity, isLinked?: boolean) {
       const entity = await core.client
         .getEntity(result.fullChat.linkedChatId)
         .catch(() => null)
-      if (entity) await registerEntity(core, entity, true)
+      if (entity) await registerGroup(core, entity)
     }
   }
 }

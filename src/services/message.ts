@@ -9,7 +9,7 @@ export function convertApiMessage(
 ): typeof models.messageTable.$inferInsert {
   const id = `${peer.id}_${msg.id}`
   const privateChat =
-    msg.fromId && getPeerId(msg.peerId) === getPeerId(msg.fromId)
+    msg.fromId && getPeerId(msg.peerId, false) === getPeerId(msg.fromId, false)
   const sender = msg.sender || (privateChat ? peer : undefined)
 
   return {

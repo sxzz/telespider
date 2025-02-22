@@ -18,5 +18,6 @@ export const entityParticipantTable = pgTable(
   (table) => [
     index('entity_name').on(table.entityName),
     index('user_display_name_left_idx').on(table.userDisplayName, table.isLeft),
+    index('created_at_idx').on(table.createdAt),
   ],
 )

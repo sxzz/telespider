@@ -1,3 +1,4 @@
+import consola from 'consola'
 import { Api } from 'telegram'
 import { NewMessage } from 'telegram/events'
 import { getPeerId } from 'telegram/Utils'
@@ -12,14 +13,15 @@ export async function watch() {
 
   core.client.addEventHandler(async (event) => {
     const { message: rawMessage } = event
-    if (!rawMessage.fromId) return
+    console.info('New message:', rawMessage.text)
 
-    // console.info('New message', rawMessage)
+    if (!rawMessage.fromId) {
+      consola.warn('No fromId in message')
+      return
+    }
 
-    const peerId = getPeerId(rawMessage.peerId)
-    let peerEntity = getDbEntityRaw(
-      await models.queryDbEntity(getPeerId(rawMessage.peerId)),
-    )
+    const peerId = getPeerId(rawMessage.peerId, false)
+    let peerEntity = getDbEntityRaw(await models.queryDbEntity(peerId))
     if (!peerEntity) {
       const messages = await core.client.invoke(
         new Api.messages.GetMessages({
@@ -31,7 +33,10 @@ export async function watch() {
       const entity = messages.users.find((user) => user.id.eq(peerId))
       peerEntity = entity
     }
-    if (!peerEntity) return
+    if (!peerEntity) {
+      consola.warn('No entity found for peer', peerId)
+      return
+    }
 
     const message = convertApiMessage(peerEntity, rawMessage)
     await models.insertMessages([message])

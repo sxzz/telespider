@@ -22,7 +22,11 @@ export async function initMeiliSearch() {
     apiKey: 'masterKey',
   })
   indexer = ms.index<models.DbMessageInsert>('messages')
-  await indexer.updateFilterableAttributes(['title'])
-  await indexer.updateSortableAttributes(['raw.date'])
+  await indexer.updateFilterableAttributes([
+    'peerName',
+    'fromUserDisplayName',
+    'fwdFromName',
+  ])
+  await indexer.updateSortableAttributes(['sentAt', 'fwdFromDate'])
   return indexer
 }

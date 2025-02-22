@@ -24,6 +24,11 @@ export const messageTable = pgTable(
     index('from_user_id_idx').on(table.fromUserId),
     index('from_user_display_name_idx').on(table.fromUserDisplayName),
     index('sent_at_idx').on(table.sentAt),
+    index('message_created_at_idx').on(table.createdAt),
+    index('message_created_at_peer_name_idx').on(
+      table.createdAt,
+      table.peerName,
+    ),
   ],
 )
 
