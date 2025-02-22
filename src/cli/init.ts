@@ -30,6 +30,8 @@ export async function initCli() {
   return {
     config,
     core,
-    [Symbol.asyncDispose]: core[Symbol.asyncDispose],
+    [Symbol.asyncDispose]() {
+      return core[Symbol.asyncDispose]()
+    },
   }
 }
