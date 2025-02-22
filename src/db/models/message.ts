@@ -27,6 +27,9 @@ export const messageTable = pgTable(
   ],
 )
 
+export type DbMessage = typeof messageTable.$inferSelect
+export type DbMessageInsert = typeof messageTable.$inferInsert
+
 export async function insertMessages(
   messages: (typeof messageTable.$inferInsert)[],
 ) {

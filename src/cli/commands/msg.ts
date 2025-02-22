@@ -2,9 +2,11 @@ import assert from 'node:assert'
 import process from 'node:process'
 import consola from 'consola'
 import { Api } from 'telegram'
-import { insertMessages, type messageTable } from '../../db/models'
+import { insertMessages, type DbMessageInsert } from '../../db/models'
 import { convertApiMessage } from '../../services/message'
 import { initCli } from '../init'
+import type { Core } from '../../core'
+import type { Entity } from 'telegram/define'
 
 export async function msg() {
   await using context = await initCli()
@@ -31,13 +33,12 @@ export async function msg() {
       initial: false,
     }))
   ) {
-    const result = await core.client.invoke(
-      new Api.channels.GetFullChannel({ channel: dialog.entity }),
-    )
-    assert(result.fullChat.className === 'ChannelFull')
-    if (result.fullChat.linkedChatId) {
-      entity = await core.client.getEntity(result.fullChat.linkedChatId)
+    const linkedChat = await getLinkedChat(core, entity)
+    if (!linkedChat) {
+      console.error('No linked chat found.')
+      return
     }
+    entity = linkedChat
   }
 
   const reverse = await consola.prompt('Reverse?', {
@@ -49,7 +50,7 @@ export async function msg() {
   //   ? undefined
   //   : await getEarliestMessage(entityId)
 
-  let messages: (typeof messageTable.$inferInsert)[] = []
+  let messages: DbMessageInsert[] = []
   let i = 0
 
   try {
@@ -94,3 +95,18 @@ export async function msg() {
 //     .limit(1)
 //   return first as typeof messagesTable.$inferSelect | undefined
 // }
+
+export async function getLinkedChat(
+  core: Core,
+  entity: Entity,
+): Promise<Entity | undefined> {
+  const result = await core.client.invoke(
+    new Api.channels.GetFullChannel({ channel: entity }),
+  )
+  if (
+    result.fullChat.className === 'ChannelFull' &&
+    result.fullChat.linkedChatId
+  ) {
+    return core.client.getEntity(result.fullChat.linkedChatId)
+  }
+}
