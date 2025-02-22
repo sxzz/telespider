@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm'
 import { Api } from 'telegram'
 import { getDisplayName } from 'telegram/Utils'
 import {
@@ -5,12 +6,14 @@ import {
   getEntityAvatarId,
   getEntityUsername,
 } from '../core/utils'
+import { db } from '../db'
 import {
   upsertDbEntities,
   type DbEntity,
   type EntityKind,
 } from '../db/models/entity'
 import { hasAvatarId, insertEntityAvatar } from '../db/models/entity-avatar'
+import { entityParticipantTable } from '../db/models/entity-participant'
 import type { Core } from '../core'
 import type { Entity } from 'telegram/define'
 
@@ -64,4 +67,37 @@ export function getDbEntityRaw(dbEntity?: DbEntity): Entity | undefined
 export function getDbEntityRaw(dbEntity?: DbEntity): Entity | undefined {
   if (!dbEntity) return
   return new Api[dbEntity.raw.className](dbEntity.raw as any)
+}
+
+export async function addAllEntityParticipants(
+  entity: Entity,
+  participants: Api.User[],
+): Promise<void> {
+  const entityId = entity.id.toString()
+  const entityName = getDisplayName(entity)
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(entityParticipantTable)
+      .set({ isLeft: true })
+      .where(eq(entityParticipantTable.entityId, entityId))
+
+    for (const participant of participants) {
+      const obj = {
+        id: `${entityId}_${participant.id}`,
+        entityId,
+        entityName,
+        userId: participant.id.toString(),
+        userDisplayName: getDisplayName(participant),
+        isLeft: false,
+      }
+      await tx
+        .insert(entityParticipantTable)
+        .values(obj)
+        .onConflictDoUpdate({
+          target: entityParticipantTable.id,
+          set: { ...obj, updatedAt: new Date() },
+        })
+    }
+  })
 }
