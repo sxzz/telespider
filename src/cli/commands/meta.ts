@@ -1,15 +1,13 @@
 import consola from 'consola'
 import { Api } from 'telegram'
 import { getDisplayName } from 'telegram/Utils'
-import { addAllEntityParticipants } from '../db/models/entity-participant'
-import { registerEntities } from '../services/enitity'
-import type { Core } from '../core'
-import { initCli } from './init'
+import { addAllEntityParticipants } from '../../db/models/entity-participant'
+import { registerEntities } from '../../services/enitity'
+import { initCli } from '../init'
+import type { Core } from '../../core'
 import type { Entity } from 'telegram/define'
 
-main()
-
-async function main() {
+export async function meta() {
   await using context = await initCli()
   const { core } = context
 
@@ -21,11 +19,7 @@ async function main() {
   }
 }
 
-export async function registerEntity(
-  core: Core,
-  entity: Entity,
-  isLinked?: boolean,
-) {
+async function registerEntity(core: Core, entity: Entity, isLinked?: boolean) {
   const entityName = getDisplayName(entity)
   consola.info(`Registering ${entity.className} ${entityName}`)
   await registerEntities(core, [entity])

@@ -21,6 +21,10 @@ export function convertApiMessage(
     messageId: msg.id.toString(),
     text: msg.text,
     sentAt: msg.date ? new Date(msg.date * 1000) : undefined,
+    fwdFromName: msg.fwdFrom?.fromName || msg.fwdFrom?.postAuthor,
+    fwdFromDate: msg.fwdFrom?.date
+      ? new Date(msg.fwdFrom.date * 1000)
+      : undefined,
     raw: msg,
   }
 }

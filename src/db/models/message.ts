@@ -14,6 +14,8 @@ export const messageTable = pgTable(
     fromUserDisplayName: text(),
     text: text().notNull(),
     sentAt: timestamp(),
+    fwdFromName: text(),
+    fwdFromDate: timestamp(),
     raw: jsonb().notNull().$type<Api.Message>(),
     ...timestamps,
   },

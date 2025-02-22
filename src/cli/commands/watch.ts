@@ -1,15 +1,13 @@
 import { Api } from 'telegram'
 import { NewMessage } from 'telegram/events'
 import { getPeerId } from 'telegram/Utils'
-import { insertMessages } from '../db/models'
-import { queryDbEntity } from '../db/models/entity'
-import { getDbEntityRaw, registerEntities } from '../services/enitity'
-import { convertApiMessage } from '../services/message'
-import { initCli } from './init'
+import { insertMessages } from '../../db/models'
+import { queryDbEntity } from '../../db/models/entity'
+import { getDbEntityRaw, registerEntities } from '../../services/enitity'
+import { convertApiMessage } from '../../services/message'
+import { initCli } from '../init'
 
-main()
-
-async function main() {
+export async function watch() {
   const context = await initCli()
   const { core } = context
 
@@ -30,7 +28,7 @@ async function main() {
         }),
       )
       if (messages.className === 'messages.MessagesNotModified') return
-      await registerEntities(messages.users)
+      await registerEntities(core, messages.users)
       const entity = messages.users.find((user) => user.id.eq(peerId))
       peerEntity = entity
     }
