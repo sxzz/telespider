@@ -4,7 +4,7 @@ import { getDisplayName } from 'telegram/Utils'
 import {
   addAllEntityParticipants,
   registerEntities,
-} from '../../services/enitity'
+} from '../../services/entity'
 import { initCli } from '../init'
 import type { Core } from '../../core'
 import type { Entity } from 'telegram/define'

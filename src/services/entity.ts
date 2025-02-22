@@ -7,23 +7,21 @@ import {
   getEntityUsername,
 } from '../core/utils'
 import { db } from '../db'
-import {
-  upsertDbEntities,
-  type DbEntity,
-  type EntityKind,
-} from '../db/models/entity'
-import { hasAvatarId, insertEntityAvatar } from '../db/models/entity-avatar'
-import { entityParticipantTable } from '../db/models/entity-participant'
+import * as models from '../db/models'
 import type { Core } from '../core'
 import type { Entity } from 'telegram/define'
 
 async function registerAvatar(core: Core, entity: Entity) {
   const avatarId = getEntityAvatarId(entity)?.toString()
-  if (!avatarId || (await hasAvatarId(avatarId))) return
+  if (!avatarId || (await models.hasAvatarId(avatarId))) return
 
   const photo = await downloadEntityAvatar(core, entity)
   if (photo)
-    insertEntityAvatar(avatarId, entity.id.toString(), photo.toString('base64'))
+    models.insertEntityAvatar(
+      avatarId,
+      entity.id.toString(),
+      photo.toString('base64'),
+    )
 }
 
 function registerAvatars(core: Core, entities: Entity[]) {
@@ -32,7 +30,7 @@ function registerAvatars(core: Core, entities: Entity[]) {
 
 export function registerEntities(core: Core, entities: Entity[]) {
   return Promise.all([
-    upsertDbEntities(
+    models.upsertDbEntities(
       entities.map((entity) => ({
         id: entity.id.toString(),
         username: getEntityUsername(entity),
@@ -46,7 +44,7 @@ export function registerEntities(core: Core, entities: Entity[]) {
   ])
 }
 
-export function getEntityKind(entity: Entity): EntityKind {
+export function getEntityKind(entity: Entity): models.EntityKind {
   return (
     {
       User: 'user',
@@ -62,9 +60,9 @@ export function getEntityKind(entity: Entity): EntityKind {
   )[entity.className]
 }
 
-export function getDbEntityRaw(dbEntity: DbEntity): Entity
-export function getDbEntityRaw(dbEntity?: DbEntity): Entity | undefined
-export function getDbEntityRaw(dbEntity?: DbEntity): Entity | undefined {
+export function getDbEntityRaw(dbEntity: models.DbEntity): Entity
+export function getDbEntityRaw(dbEntity?: models.DbEntity): Entity | undefined
+export function getDbEntityRaw(dbEntity?: models.DbEntity): Entity | undefined {
   if (!dbEntity) return
   return new Api[dbEntity.raw.className](dbEntity.raw as any)
 }
@@ -78,9 +76,9 @@ export async function addAllEntityParticipants(
 
   await db.transaction(async (tx) => {
     await tx
-      .update(entityParticipantTable)
+      .update(models.entityParticipantTable)
       .set({ isLeft: true })
-      .where(eq(entityParticipantTable.entityId, entityId))
+      .where(eq(models.entityParticipantTable.entityId, entityId))
 
     for (const participant of participants) {
       const obj = {
@@ -92,10 +90,10 @@ export async function addAllEntityParticipants(
         isLeft: false,
       }
       await tx
-        .insert(entityParticipantTable)
+        .insert(models.entityParticipantTable)
         .values(obj)
         .onConflictDoUpdate({
-          target: entityParticipantTable.id,
+          target: models.entityParticipantTable.id,
           set: { ...obj, updatedAt: new Date() },
         })
     }

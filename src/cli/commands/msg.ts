@@ -2,7 +2,7 @@ import assert from 'node:assert'
 import process from 'node:process'
 import consola from 'consola'
 import { Api } from 'telegram'
-import { insertMessages, type DbMessageInsert } from '../../db/models'
+import * as models from '../../db/models'
 import { convertApiMessage } from '../../services/message'
 import { initCli } from '../init'
 import type { Core } from '../../core'
@@ -50,7 +50,7 @@ export async function msg() {
   //   ? undefined
   //   : await getEarliestMessage(entityId)
 
-  let messages: DbMessageInsert[] = []
+  let messages: models.DbMessageInsert[] = []
   let i = 0
 
   try {
@@ -81,7 +81,7 @@ export async function msg() {
 
   async function commit() {
     if (!messages.length) return
-    await insertMessages(messages)
+    await models.insertMessages(messages)
     messages = []
   }
 }

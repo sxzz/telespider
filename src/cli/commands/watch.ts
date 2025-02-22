@@ -1,9 +1,8 @@
 import { Api } from 'telegram'
 import { NewMessage } from 'telegram/events'
 import { getPeerId } from 'telegram/Utils'
-import { insertMessages } from '../../db/models'
-import { queryDbEntity } from '../../db/models/entity'
-import { getDbEntityRaw, registerEntities } from '../../services/enitity'
+import * as models from '../../db/models'
+import { getDbEntityRaw, registerEntities } from '../../services/entity'
 import { convertApiMessage } from '../../services/message'
 import { initCli } from '../init'
 
@@ -19,7 +18,7 @@ export async function watch() {
 
     const peerId = getPeerId(rawMessage.peerId)
     let peerEntity = getDbEntityRaw(
-      await queryDbEntity(getPeerId(rawMessage.peerId)),
+      await models.queryDbEntity(getPeerId(rawMessage.peerId)),
     )
     if (!peerEntity) {
       const messages = await core.client.invoke(
@@ -35,7 +34,7 @@ export async function watch() {
     if (!peerEntity) return
 
     const message = convertApiMessage(peerEntity, rawMessage)
-    await insertMessages([message])
+    await models.insertMessages([message])
   }, new NewMessage())
 
   await core.client.start(core.authParams)
