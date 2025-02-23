@@ -11,6 +11,8 @@ export async function watch() {
   const context = await initCli()
   const { core } = context
 
+  const me = await core.client.getMe()
+
   core.client.addEventHandler(async (event) => {
     const { message: rawMessage } = event
     console.info('New message:', rawMessage.text)
@@ -38,7 +40,7 @@ export async function watch() {
       return
     }
 
-    const message = convertApiMessage(peerEntity, rawMessage)
+    const message = convertApiMessage(me, peerEntity, rawMessage)
     await models.insertMessages([message])
   }, new NewMessage())
 

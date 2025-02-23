@@ -1,5 +1,6 @@
+import consola from 'consola'
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { MeiliSearch, type Index } from 'meilisearch'
+import { MeiliSearch, type EnqueuedTask, type Index } from 'meilisearch'
 import { loadConfig } from '../config'
 import type * as models from './models/message'
 
@@ -22,11 +23,30 @@ export async function initMeiliSearch() {
     apiKey: 'masterKey',
   })
   indexer = ms.index<models.DbMessageInsert>('messages')
-  await indexer.updateFilterableAttributes([
+  const filterableAttrs = (await indexer.getFilterableAttributes()).sort()
+  const sortableAttrs = (await indexer.getSortableAttributes()).sort()
+
+  const expectedFilterableAttrs = [
     'peerName',
     'fromUserDisplayName',
     'fwdFromName',
-  ])
-  await indexer.updateSortableAttributes(['sentAt', 'fwdFromDate'])
+    'raw.fromId.className',
+  ].sort()
+  const expectedSortableAttrs = ['sentAt', 'fwdFromDate'].sort()
+  const tasks: EnqueuedTask[] = []
+  if (
+    JSON.stringify(filterableAttrs) !== JSON.stringify(expectedFilterableAttrs)
+  ) {
+    tasks.push(
+      await indexer.updateFilterableAttributes(expectedFilterableAttrs),
+    )
+  }
+  if (JSON.stringify(sortableAttrs) !== JSON.stringify(expectedSortableAttrs)) {
+    tasks.push(await indexer.updateSortableAttributes(expectedSortableAttrs))
+  }
+  if (tasks.length) {
+    consola.info('MeiliSearch index settings updated')
+    await ms.waitForTasks(tasks.map((task) => task.taskUid))
+  }
   return indexer
 }

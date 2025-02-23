@@ -13,7 +13,12 @@ export async function msg() {
   await using context = await initCli()
   const { core } = context
 
-  const dialogs = await Array.fromAsync(core.client.iterDialogs())
+  const me = await core.client.getMe()
+
+  const dialogs = (await Array.fromAsync(core.client.iterDialogs())).filter(
+    (dialog) => dialog.entity?.className === 'User' && !dialog.entity.bot,
+  )
+
   let messages: models.DbMessageInsert[] = []
 
   while (true) {
@@ -72,7 +77,7 @@ export async function msg() {
         // offsetDate: earliestMessage?.raw.date,
         reverse,
       })) {
-        messages.push(convertApiMessage(entity, msg))
+        messages.push(convertApiMessage(me, entity, msg))
 
         i++
         if (messages.length >= 500) {

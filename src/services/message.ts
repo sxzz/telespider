@@ -1,21 +1,33 @@
-import { getDisplayName, getPeerId } from 'telegram/Utils'
+import { getDisplayName } from 'telegram/Utils'
 import type * as models from '../db/models'
+import { getEntityKind } from './entity'
 import type { Api } from 'telegram'
 import type { Entity } from 'telegram/define'
 
 export function convertApiMessage(
+  me: Api.User,
   peer: Entity,
   msg: Api.Message,
 ): typeof models.messageTable.$inferInsert {
-  const id = `${peer.id}_${msg.id}`
-  const privateChat =
-    msg.fromId && getPeerId(msg.peerId, false) === getPeerId(msg.fromId, false)
-  const sender = msg.sender || (privateChat ? peer : undefined)
+  const isPrivateChat = msg.peerId.className === 'PeerUser'
+  let peerOwnerId: string | undefined
+
+  if (isPrivateChat) {
+    peerOwnerId = me.id.toString()
+  }
+
+  let id = `${peer.id}_`
+  if (peerOwnerId) id += `${peerOwnerId}_`
+  id += msg.id
+
+  const sender = msg.sender || (isPrivateChat ? peer : undefined)
 
   return {
     id,
     peerId: peer.id.toString(),
     peerName: getDisplayName(peer),
+    peerKind: getEntityKind(peer),
+    peerOwnerId,
     fromUserId: sender && sender.id.toString(),
     fromUserDisplayName: sender && getDisplayName(sender),
     messageId: msg.id.toString(),

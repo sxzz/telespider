@@ -1,6 +1,7 @@
 import { index, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { db, indexer } from '..'
 import { timestamps } from './common'
+import { entityKind } from './entity'
 import type { Api } from 'telegram'
 
 export const messageTable = pgTable(
@@ -9,6 +10,9 @@ export const messageTable = pgTable(
     id: text().primaryKey(),
     peerId: text().notNull(),
     peerName: text().notNull(),
+    peerKind: entityKind().notNull(),
+    /** only for private chat */
+    peerOwnerId: text(),
     messageId: text().notNull(),
     fromUserId: text(),
     fromUserDisplayName: text(),
