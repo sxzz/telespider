@@ -1,92 +1,111 @@
-import assert from 'node:assert'
 import process from 'node:process'
 import consola from 'consola'
 import { Api } from 'telegram'
 import { getDisplayName } from 'telegram/Utils'
+import { getEntityType, type EntityType } from '../../core/utils'
 import * as models from '../../db/models'
 import { convertApiMessage } from '../../services/message'
 import { initCli } from '../init'
 import type { Core } from '../../core'
 import type { Entity } from 'telegram/define'
 
-export async function msg() {
+interface ChannelLinkedChat {
+  channel: Api.Channel
+  isLinkedChat: true
+}
+
+export async function msg({
+  type = 'all',
+  limit,
+}: {
+  type?: EntityType
+  limit?: number
+}) {
+  limit = limit ? +limit : undefined
+
   await using context = await initCli()
   const { core } = context
 
   const me = await core.client.getMe()
 
-  const dialogs = (await Array.fromAsync(core.client.iterDialogs())).filter(
-    (dialog) => dialog.entity?.className === 'User' && !dialog.entity.bot,
+  const dialogs = await Array.fromAsync(core.client.iterDialogs())
+  let entities = dialogs
+    .map((dialog) => dialog.entity)
+    .filter((entity) => !!entity)
+  if (type !== 'all') {
+    entities = entities.filter((entity) => getEntityType(entity) === type)
+  }
+
+  const entitiesWithLink = entities.flatMap<Entity | ChannelLinkedChat>(
+    (entity) => {
+      if (entity.className === 'Channel' && entity.hasLink) {
+        return [entity, { channel: entity, isLinkedChat: true }]
+      }
+      return entity
+    },
   )
 
   let messages: models.DbMessageInsert[] = []
 
-  while (true) {
-    await single()
-  }
+  const selecteds = await consola.prompt('Select entities:', {
+    type: 'multiselect',
+    cancel: 'null',
+    options: entitiesWithLink.map((entity, i) => {
+      const kind = 'isLinkedChat' in entity ? 'channel' : getEntityType(entity)
+      const title =
+        'isLinkedChat' in entity
+          ? `${getDisplayName(entity.channel)}'s linked chat`
+          : getDisplayName(entity)
+      return {
+        label: `[${kind}] ${title}`,
+        value: String(i),
+      }
+    }),
+  })
+  if (selecteds == null) process.exit(0)
 
-  async function single() {
-    const idx = await consola.prompt('Select a dialog:', {
-      type: 'select',
-      cancel: 'null',
-      options: dialogs.map((dialog, i) => {
-        const type = dialog.entity?.className
-          ? `[${dialog.entity.className.toLowerCase()}] `
-          : ''
-        const title =
-          dialog.title ||
-          (dialog.entity ? getDisplayName(dialog.entity) : '(Unnamed)')
-        return {
-          label: type + title,
-          value: String(i),
-        }
-      }),
-    })
-    if (idx == null) process.exit(0)
-
-    if (idx == null) return
-    const dialog = dialogs[Number(idx)]
-
-    let entity = dialog.entity
-    assert(entity)
-    if (
-      entity?.className === 'Channel' &&
-      entity.hasLink &&
-      (await consola.prompt('Get linked group?', {
-        type: 'confirm',
-        initial: false,
-      }))
-    ) {
-      const linkedChat = await getLinkedChat(core, entity)
+  const seen = new Set<number>()
+  for (const idx of selecteds) {
+    let entity = entitiesWithLink[Number(idx)]
+    if ('isLinkedChat' in entity) {
+      const linkedChat = await getLinkedChat(core, entity.channel)
       if (!linkedChat) {
-        console.error('No linked chat found.')
-        return
+        consola.warn('No linked chat found for', getDisplayName(entity.channel))
+        continue
       }
       entity = linkedChat
     }
 
-    const reverse = await consola.prompt('Reverse?', {
-      type: 'confirm',
-      initial: false,
-    })
+    if (seen.has(entity.id.valueOf())) {
+      consola.info('Already fetched messages from', getDisplayName(entity))
+      continue
+    }
+    seen.add(entity.id.valueOf())
+
+    consola.info(`Fetching messages from ${getDisplayName(entity)}`)
+
+    // const reverse = await consola.prompt('Reverse?', {
+    //   type: 'confirm',
+    //   initial: false,
+    // })
 
     let i = 0
-
     try {
       for await (const msg of core.client.iterMessages(entity, {
         // offsetDate: earliestMessage?.raw.date,
-        reverse,
+        // reverse,
+        limit,
       })) {
         messages.push(convertApiMessage(me, entity, msg))
 
         i++
         if (messages.length >= 500) {
-          console.info(`Saved ${i} messages in total.`)
+          consola.success(`Saved ${i} messages in total.`)
           await commit()
         }
       }
     } catch (error: any) {
-      console.error(error)
+      consola.error(error)
     }
     await commit()
   }

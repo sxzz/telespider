@@ -22,7 +22,7 @@ export async function watch() {
       return
     }
 
-    const peerId = getPeerId(rawMessage.peerId, false)
+    const peerId = +getPeerId(rawMessage.peerId, false)
     let peerEntity = getDbEntityRaw(await models.queryDbEntity(peerId))
     if (!peerEntity) {
       const messages = await core.client.invoke(

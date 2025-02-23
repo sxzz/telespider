@@ -1,4 +1,11 @@
-import { index, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import {
+  bigint,
+  index,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+} from 'drizzle-orm/pg-core'
 import { db, indexer } from '..'
 import { timestamps } from './common'
 import { entityKind } from './entity'
@@ -8,13 +15,13 @@ export const messageTable = pgTable(
   'message',
   {
     id: text().primaryKey(),
-    peerId: text().notNull(),
+    peerId: bigint({ mode: 'number' }).notNull(),
     peerName: text().notNull(),
     peerKind: entityKind().notNull(),
     /** only for private chat */
-    peerOwnerId: text(),
-    messageId: text().notNull(),
-    fromUserId: text(),
+    peerOwnerId: bigint({ mode: 'number' }),
+    messageId: bigint({ mode: 'number' }).notNull(),
+    fromUserId: bigint({ mode: 'number' }),
     fromUserDisplayName: text(),
     text: text().notNull(),
     sentAt: timestamp(),

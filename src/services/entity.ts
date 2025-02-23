@@ -32,7 +32,7 @@ export function registerEntities(core: Core, entities: Entity[]) {
   return Promise.all([
     models.upsertDbEntities(
       entities.map((entity) => ({
-        id: entity.id.toString(),
+        id: entity.id.valueOf(),
         username: getEntityUsername(entity),
         displayName: getDisplayName(entity),
         kind: getEntityKind(entity),

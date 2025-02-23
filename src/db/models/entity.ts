@@ -1,5 +1,12 @@
 import { eq } from 'drizzle-orm'
-import { boolean, jsonb, pgEnum, pgTable, text } from 'drizzle-orm/pg-core'
+import {
+  bigint,
+  boolean,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+} from 'drizzle-orm/pg-core'
 import { db } from '..'
 import { omitUndefined } from '../../utils/general'
 import { timestamps } from './common'
@@ -9,7 +16,7 @@ export const entityKind = pgEnum('entity_kind', ['user', 'chat', 'channel'])
 export type EntityKind = (typeof entityKind.enumValues)[number]
 
 export const entityTable = pgTable('entity', {
-  id: text().primaryKey(),
+  id: bigint({ mode: 'number' }).primaryKey(),
   username: text(),
   displayName: text().notNull(),
   kind: entityKind().notNull(),
@@ -21,7 +28,7 @@ export const entityTable = pgTable('entity', {
 export type DbEntity = typeof entityTable.$inferSelect
 export type DbEntityInsert = typeof entityTable.$inferInsert
 
-export async function queryDbEntity(id: string): Promise<DbEntity | undefined> {
+export async function queryDbEntity(id: number): Promise<DbEntity | undefined> {
   const [user] = await db
     .select()
     .from(entityTable)
