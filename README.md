@@ -2,6 +2,8 @@
 
 [![Unit Test](https://github.com/sxzz/telespider/actions/workflows/unit-test.yml/badge.svg)](https://github.com/sxzz/telespider/actions/workflows/unit-test.yml)
 
+🚧 WIP: Telegram crawler
+
 ## Install
 
 ```bash
