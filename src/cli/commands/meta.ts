@@ -1,6 +1,7 @@
 import consola from 'consola'
 import { Api } from 'telegram'
 import { getDisplayName } from 'telegram/Utils'
+import { getEntityType, type EntityType } from '../../core/utils'
 import {
   addAllEntityParticipants,
   registerEntities,
@@ -9,17 +10,21 @@ import { initCli } from '../init'
 import type { Core } from '../../core'
 import type { Entity } from 'telegram/define'
 
-export async function meta() {
+export async function meta({ type = 'all' }: { type?: EntityType }) {
   await using context = await initCli()
   const { core } = context
 
-  const entities = (await Array.fromAsync(core.client.iterDialogs()))
+  let entities = (await Array.fromAsync(core.client.iterDialogs()))
     .map((dialog) => dialog.entity)
     .filter((ent) => !!ent)
+  if (type !== 'all') {
+    entities = entities.filter((entity) => getEntityType(entity) === type)
+  }
+
   const p = registerEntities(core, entities)
 
   const groups = entities.filter(
-    (ent) => ent?.className !== 'User' && ent?.className !== 'UserEmpty',
+    (ent) => getEntityType(ent) !== 'user' && getEntityType(ent) !== 'bot',
   )
   const selecteds = await consola.prompt('Select groups and channels', {
     type: 'multiselect',
@@ -55,7 +60,7 @@ async function registerGroup(core: Core, entity: Entity) {
     await registerEntities(core, [user])
   }
 
-  if (entity.className === 'Channel') {
+  if (getEntityType(entity) === 'channel') {
     const result = await core.client.invoke(
       new Api.channels.GetFullChannel({ channel: entity }),
     )

@@ -11,7 +11,6 @@ cli
   .option('--type <type>', `Filter entity type: ${ENTITY_TYPES.join(', ')}`, {
     default: 'all',
   })
-  .option('--limit <limit>', 'Limit messages count')
   .command('')
   .action(msg)
 cli.command('meta').action(meta)
