@@ -3,7 +3,7 @@ import { pgTable, text } from 'drizzle-orm/pg-core'
 import { db } from '..'
 import { timestamps } from './common'
 
-export const entityAvatarTable = pgTable('entity-avatar', {
+export const entityAvatarTable = pgTable('entity_avatar', {
   id: text().primaryKey(),
   userId: text().notNull(),
   data: text().notNull(),

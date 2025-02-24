@@ -40,6 +40,10 @@ export const messageTable = pgTable(
       table.createdAt,
       table.peerName,
     ),
+    index('message_peer_owner_created_at_id').on(
+      table.peerOwnerId,
+      table.createdAt,
+    ),
   ],
 )
 

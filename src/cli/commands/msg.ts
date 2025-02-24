@@ -4,7 +4,12 @@ import { Api } from 'telegram'
 import { getDisplayName } from 'telegram/Utils'
 import { getEntityType, type EntityType } from '../../core/utils'
 import * as models from '../../db/models'
-import { convertApiMessage } from '../../services/message'
+import {
+  convertApiMessage,
+  getDbPeerId,
+  getNextMessageId,
+  mergeMessageRanges,
+} from '../../services/message'
 import { initCli } from '../init'
 import type { Core } from '../../core'
 import type { Entity } from 'telegram/define'
@@ -14,15 +19,7 @@ interface ChannelLinkedChat {
   isLinkedChat: true
 }
 
-export async function msg({
-  type = 'all',
-  limit,
-}: {
-  type?: EntityType
-  limit?: number
-}) {
-  limit = limit ? +limit : undefined
-
+export async function msg({ type = 'all' }: { type?: EntityType }) {
   await using context = await initCli()
   const { core } = context
 
@@ -84,37 +81,87 @@ export async function msg({
 
     consola.info(`Fetching messages from ${getDisplayName(entity)}`)
 
-    // const reverse = await consola.prompt('Reverse?', {
-    //   type: 'confirm',
-    //   initial: false,
-    // })
+    const { peerId, peerOwnerId } = getDbPeerId(me, entity)
+    const messageRange = await models.getMessageRange(peerId, peerOwnerId)
+    let jumpToId: number | undefined
 
-    let i = 0
-    try {
+    // TODO
+    const reverse = false
+    const nextOne = reverse ? 1 : -1
+    const lastOne = -nextOne
+    let initialId = messageRange.initialId
+
+    do {
+      let start: number | null = null
+      let end: number | null = null
+      let offsetId: number | undefined
+      if (jumpToId) {
+        // offset id is the last message id of the previous batch
+        offsetId = jumpToId + lastOne
+        jumpToId = undefined
+        start = null
+        end = null
+      }
+
       for await (const msg of core.client.iterMessages(entity, {
-        // offsetDate: earliestMessage?.raw.date,
-        // reverse,
-        limit,
+        reverse,
+        offsetId,
       })) {
+        const currentId = (end = msg.id)
+        if (start === null) {
+          start = offsetId == null ? currentId : offsetId + nextOne
+        }
         messages.push(convertApiMessage(me, entity, msg))
 
-        i++
+        const next = getNextMessageId(
+          messageRange.ranges,
+          currentId,
+          reverse,
+          initialId ?? undefined,
+        )
+        if (next == null) {
+          consola.info('Skip saved messages')
+          break
+        }
+        if (next !== currentId + nextOne) {
+          consola.info('Jump to message id:', next)
+          jumpToId = next
+          break
+        }
+
         if (messages.length >= 500) {
-          consola.success(`Saved ${i} messages in total.`)
-          await commit()
+          consola.success(`Saved ${messages.length} messages in total.`)
+          await commit(start, end)
         }
       }
-    } catch (error: any) {
-      consola.error(error)
+
+      if (!reverse && initialId == null && jumpToId == null) {
+        initialId = end ?? offsetId ?? null
+      }
+      await commit(start, end)
+    } while (jumpToId != null)
+
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    async function commit(start: number | null, end: number | null) {
+      if (messages.length) {
+        await models.insertMessages(messages)
+        messages = []
+      }
+      if (start != null && end != null) {
+        messageRange.ranges = mergeMessageRanges([
+          ...messageRange.ranges,
+          [Math.min(start, end), Math.max(start, end)],
+        ])
+      }
+      await models.updateMessageRange(peerId, peerOwnerId, {
+        initialId,
+        ranges: messageRange.ranges,
+      })
     }
-    await commit()
   }
 
-  async function commit() {
-    if (!messages.length) return
-    await models.insertMessages(messages)
-    messages = []
-  }
+  consola.success('Done!')
+  process.exit(0)
 }
 
 export async function getLinkedChat(

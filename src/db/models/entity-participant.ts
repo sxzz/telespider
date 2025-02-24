@@ -2,7 +2,7 @@ import { boolean, index, pgTable, text } from 'drizzle-orm/pg-core'
 import { timestamps } from './common'
 
 export const entityParticipantTable = pgTable(
-  'entity-participant',
+  'entity_participant',
   {
     id: text().primaryKey(),
     entityId: text().notNull(),

@@ -8,6 +8,12 @@
 npm i telespider
 ```
 
+## TODO
+
+- progress bar
+- support reverse mode
+- export mode
+
 ## Sponsors
 
 <p align="center">
