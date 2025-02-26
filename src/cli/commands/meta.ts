@@ -71,7 +71,10 @@ async function registerGroup(core: Core, entity: Entity) {
       const entity = await core.client
         .getEntity(result.fullChat.linkedChatId)
         .catch(() => null)
-      if (entity) await registerGroup(core, entity)
+      if (entity) {
+        await registerEntities(core, [entity])
+        await registerGroup(core, entity)
+      }
     }
   }
 }
