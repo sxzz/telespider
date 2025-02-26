@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, isNotNull, isNull, or } from 'drizzle-orm'
 import { bigint, jsonb, pgTable, text } from 'drizzle-orm/pg-core'
 import { db } from '..'
 import { timestamps } from './common'
@@ -62,4 +62,22 @@ export function updateMessageRange(
       target: [messageRangeTable.id],
       set: { ...set, updatedAt: new Date() },
     })
+}
+
+export async function getCompletedPeerIds(ownerId: number) {
+  const data = await db
+    .select({
+      peerId: messageRangeTable.peerId,
+    })
+    .from(messageRangeTable)
+    .where(
+      and(
+        isNotNull(messageRangeTable.initialId),
+        or(
+          isNull(messageRangeTable.peerOwnerId),
+          eq(messageRangeTable.peerOwnerId, ownerId),
+        ),
+      ),
+    )
+  return data.map((x) => x.peerId)
 }

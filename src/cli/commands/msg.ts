@@ -44,9 +44,19 @@ export async function msg({ type = 'all' }: { type?: EntityType }) {
 
   let messages: models.DbMessageInsert[] = []
 
+  const completedIds = await models.getCompletedPeerIds(me.id.valueOf())
   const selecteds = await consola.prompt('Select entities:', {
     type: 'multiselect',
     cancel: 'null',
+    initial: completedIds
+      .map((id) => {
+        const idx = entitiesWithLink.findIndex((entity) => {
+          if ('isLinkedChat' in entity) return false
+          return entity.id.valueOf() === id
+        })
+        return String(idx)
+      })
+      .filter((idx) => idx !== '-1'),
     options: entitiesWithLink.map((entity, i) => {
       const kind = 'isLinkedChat' in entity ? 'channel' : getEntityType(entity)
       const title =
