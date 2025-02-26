@@ -69,9 +69,6 @@ importers:
       eslint:
         specifier: ^9.20.1
         version: 9.20.1(jiti@2.4.2)
-      oxc-transform:
-        specifier: ^0.51.0
-        version: 0.51.0
       prettier:
         specifier: ^3.5.1
         version: 3.5.1
@@ -5422,6 +5419,7 @@ snapshots:
       '@oxc-transform/binding-linux-x64-musl': 0.51.0
       '@oxc-transform/binding-win32-arm64-msvc': 0.51.0
       '@oxc-transform/binding-win32-x64-msvc': 0.51.0
+    optional: true
 
   p-limit@2.3.0:
     dependencies:
