@@ -1,7 +1,7 @@
 {
   "name": "telespider",
   "version": "0.0.0",
-  "packageManager": "pnpm@10.4.1",
+  "packageManager": "pnpm@10.5.2",
   "description": "undefined",
   "type": "module",
   "license": "MIT",
@@ -40,34 +40,34 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "ansis": "^3.15.0",
+    "ansis": "^3.17.0",
     "big-integer": "^1.6.52",
     "cac": "^6.7.14",
     "consola": "^3.4.0",
     "debug": "^4.4.0",
     "defu": "^6.1.4",
     "dotenv": "^16.4.7",
-    "drizzle-orm": "^0.39.3",
+    "drizzle-orm": "^0.40.0",
     "meilisearch": "^0.49.0",
     "pg": "^8.13.3",
     "telegram": "^2.26.22",
-    "unconfig": "^7.0.0"
+    "unconfig": "^7.1.0"
   },
   "devDependencies": {
     "@sxzz/eslint-config": "^5.1.1",
     "@sxzz/prettier-config": "^2.2.0",
     "@types/debug": "^4.1.12",
-    "@types/node": "^22.13.4",
+    "@types/node": "^22.13.8",
     "@types/pg": "^8.11.11",
     "bumpp": "^10.0.3",
-    "drizzle-kit": "^0.30.4",
-    "eslint": "^9.20.1",
-    "prettier": "^3.5.1",
+    "drizzle-kit": "^0.30.5",
+    "eslint": "^9.21.0",
+    "prettier": "^3.5.2",
     "tsdown": "^0.6.0",
     "tsx": "^4.19.3",
-    "type-fest": "^4.35.0",
-    "typescript": "^5.7.3",
-    "vitest": "^3.0.6"
+    "type-fest": "^4.36.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7"
   },
   "engines": {
     "node": ">=20.18.0"
