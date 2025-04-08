@@ -43,6 +43,7 @@ export async function msg({ type = 'all' }: { type?: EntityType }) {
   )
 
   let messages: models.DbMessageInsert[] = []
+  let count = 0
 
   const completedIds = await models.getCompletedPeerIds(me.id.valueOf())
   const selecteds = await consola.prompt('Select entities:', {
@@ -122,6 +123,7 @@ export async function msg({ type = 'all' }: { type?: EntityType }) {
           start = offsetId == null ? currentId : offsetId + nextOne
         }
         messages.push(convertApiMessage(me, entity, msg))
+        count++
 
         const next = getNextMessageId(
           messageRange.ranges,
@@ -140,8 +142,8 @@ export async function msg({ type = 'all' }: { type?: EntityType }) {
         }
 
         if (messages.length >= 500) {
-          consola.success(`Saved ${messages.length} messages in total.`)
           await commit(start, end)
+          consola.success(`Saved ${count} messages in total.`)
         }
       }
 
