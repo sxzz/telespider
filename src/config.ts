@@ -7,6 +7,7 @@ import type { RequiredDeep } from 'type-fest'
 export function loadEnv() {
   dotenv.config({
     path: ['.env.local', '.env'],
+    quiet: true,
   })
 }
 
