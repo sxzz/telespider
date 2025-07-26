@@ -6,6 +6,8 @@ import { loadConfig } from '../config'
 import { createCore } from '../core'
 import { initDb, initMeiliSearch } from '../db'
 
+consola.options.formatOptions.date = false
+
 export async function initCli() {
   const config = await loadConfig()
   await initDb()
