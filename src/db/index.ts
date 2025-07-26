@@ -23,7 +23,9 @@ export async function initMeiliSearch() {
     apiKey: 'masterKey',
   })
   indexer = ms.index<models.DbMessageInsert>('messages')
-  const filterableAttrs = (await indexer.getFilterableAttributes()).sort()
+  const filterableAttrs = (
+    (await indexer.getFilterableAttributes()) || []
+  ).sort()
   const sortableAttrs = (await indexer.getSortableAttributes()).sort()
 
   const expectedFilterableAttrs = [
@@ -46,7 +48,7 @@ export async function initMeiliSearch() {
   }
   if (tasks.length) {
     consola.info('MeiliSearch index settings updated')
-    await ms.waitForTasks(tasks.map((task) => task.taskUid))
+    await ms.tasks.waitForTasks(tasks.map((task) => task.taskUid))
   }
   return indexer
 }
