@@ -9,7 +9,7 @@ import {
 import { db, indexer } from '..'
 import { timestamps } from './common'
 import { entityKind } from './entity'
-import type { Api } from 'telegram'
+import type { Api } from 'teleproto'
 
 export const messageTable = pgTable(
   'message',

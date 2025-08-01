@@ -1,7 +1,7 @@
 import type { Core } from '.'
 import type { Buffer } from 'node:buffer'
-import type { Api } from 'telegram'
-import type { Entity } from 'telegram/define'
+import type { Api } from 'teleproto'
+import type { Entity } from 'teleproto/define'
 
 export function getUserDisplayName(user: Api.User) {
   return `${user.firstName || ''} ${user.lastName || ''}`.trim()

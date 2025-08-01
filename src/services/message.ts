@@ -1,8 +1,8 @@
-import { getDisplayName } from 'telegram/Utils'
+import { getDisplayName } from 'teleproto/Utils'
 import type * as models from '../db/models'
 import { getEntityKind } from './entity'
-import type { Api } from 'telegram'
-import type { Entity } from 'telegram/define'
+import type { Api } from 'teleproto'
+import type { Entity } from 'teleproto/define'
 
 export function convertApiMessage(
   me: Api.User,

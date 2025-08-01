@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
-import { Api } from 'telegram'
-import { getDisplayName } from 'telegram/Utils'
+import { Api } from 'teleproto'
+import { getDisplayName } from 'teleproto/Utils'
 import {
   downloadEntityAvatar,
   getEntityAvatarId,
@@ -9,7 +9,7 @@ import {
 import { db } from '../db'
 import * as models from '../db/models'
 import type { Core } from '../core'
-import type { Entity } from 'telegram/define'
+import type { Entity } from 'teleproto/define'
 
 async function registerAvatar(core: Core, entity: Entity) {
   const avatarId = getEntityAvatarId(entity)?.toString()

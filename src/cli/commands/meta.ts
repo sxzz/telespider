@@ -1,6 +1,6 @@
 import consola from 'consola'
-import { Api } from 'telegram'
-import { getDisplayName } from 'telegram/Utils'
+import { Api } from 'teleproto'
+import { getDisplayName } from 'teleproto/Utils'
 import { getEntityType, type EntityType } from '../../core/utils'
 import {
   addAllEntityParticipants,
@@ -8,7 +8,7 @@ import {
 } from '../../services/entity'
 import { initCli } from '../init'
 import type { Core } from '../../core'
-import type { Entity } from 'telegram/define'
+import type { Entity } from 'teleproto/define'
 
 export async function meta({ type = 'all' }: { type?: EntityType }) {
   await using context = await initCli()

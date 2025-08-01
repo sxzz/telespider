@@ -10,7 +10,7 @@ import {
 import { db } from '..'
 import { omitUndefined } from '../../utils/general'
 import { timestamps } from './common'
-import type { Entity } from 'telegram/define'
+import type { Entity } from 'teleproto/define'
 
 export const entityKind = pgEnum('entity_kind', ['user', 'chat', 'channel'])
 export type EntityKind = (typeof entityKind.enumValues)[number]

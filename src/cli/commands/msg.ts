@@ -1,7 +1,7 @@
 import process from 'node:process'
 import consola from 'consola'
-import { Api } from 'telegram'
-import { getDisplayName } from 'telegram/Utils'
+import { Api } from 'teleproto'
+import { getDisplayName } from 'teleproto/Utils'
 import { getEntityType, type EntityType } from '../../core/utils'
 import * as models from '../../db/models'
 import {
@@ -12,7 +12,7 @@ import {
 } from '../../services/message'
 import { initCli } from '../init'
 import type { Core } from '../../core'
-import type { Entity } from 'telegram/define'
+import type { Entity } from 'teleproto/define'
 
 interface ChannelLinkedChat {
   channel: Api.Channel

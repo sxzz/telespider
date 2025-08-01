@@ -1,12 +1,12 @@
-import { TelegramClient } from 'telegram'
-import { Logger, LogLevel } from 'telegram/extensions/Logger'
-import { StringSession } from 'telegram/sessions'
+import { TelegramClient } from 'teleproto'
+import { Logger, LogLevel } from 'teleproto/extensions/Logger'
+import { StringSession } from 'teleproto/sessions'
 import {
   normalizeCallbackable,
   type Awaitable,
   type Callbackable,
 } from '../utils/general'
-import type { UserAuthParams } from 'telegram/client/auth'
+import type { UserAuthParams } from 'teleproto/client/auth'
 
 export interface CoreOptions {
   apiId: number
