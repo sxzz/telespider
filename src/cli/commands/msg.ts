@@ -10,13 +10,14 @@ import {
   getNextMessageId,
   mergeMessageRanges,
 } from '../../services/message'
+import { select } from '../../utils/select'
 import { initCli } from '../init'
 import type { Core } from '../../core'
 import type { Entity } from 'teleproto/define'
 
-interface ChannelLinkedChat {
+interface ChannelLinked {
   channel: Api.Channel
-  isLinkedChat: true
+  linkedType: 'chat' | 'monoforum'
 }
 
 export async function msg({ type = 'all' }: { type?: EntityType }) {
@@ -33,12 +34,18 @@ export async function msg({ type = 'all' }: { type?: EntityType }) {
     entities = entities.filter((entity) => getEntityType(entity) === type)
   }
 
-  const entitiesWithLink = entities.flatMap<Entity | ChannelLinkedChat>(
+  const entitiesWithLink = entities.flatMap<Entity | ChannelLinked>(
     (entity) => {
-      if (entity.className === 'Channel' && entity.hasLink) {
-        return [entity, { channel: entity, isLinkedChat: true }]
+      const extras: ChannelLinked[] = []
+      if (entity.className === 'Channel') {
+        if (entity.hasLink) {
+          extras.push({ channel: entity, linkedType: 'chat' })
+        }
+        if (entity.linkedMonoforumId) {
+          extras.push({ channel: entity, linkedType: 'monoforum' })
+        }
       }
-      return entity
+      return [entity, ...extras]
     },
   )
 
@@ -46,42 +53,57 @@ export async function msg({ type = 'all' }: { type?: EntityType }) {
   let count = 0
 
   const completedIds = await models.getCompletedPeerIds(me.id.valueOf())
-  const selecteds = await consola.prompt('Select entities:', {
-    type: 'multiselect',
-    cancel: 'null',
-    initial: completedIds
+  const selecteds = await select(
+    'Select entities:',
+    entitiesWithLink.map((entity, i) => {
+      let kind: EntityType
+      if ('linkedType' in entity) {
+        if (entity.linkedType === 'chat') {
+          kind = 'channel'
+        } else {
+          kind = 'chat'
+        }
+      } else {
+        kind = getEntityType(entity)
+      }
+      const title =
+        'linkedType' in entity
+          ? `${getDisplayName(entity.channel)}'s linked ${entity.linkedType}`
+          : getDisplayName(entity)
+      return {
+        name: `[${kind}] ${title}`,
+        value: String(i),
+      }
+    }),
+    completedIds
       .map((id) => {
         const idx = entitiesWithLink.findIndex((entity) => {
-          if ('isLinkedChat' in entity) return false
+          if ('linkedType' in entity) return false
           return entity.id.valueOf() === id
         })
         return String(idx)
       })
       .filter((idx) => idx !== '-1'),
-    options: entitiesWithLink.map((entity, i) => {
-      const kind = 'isLinkedChat' in entity ? 'channel' : getEntityType(entity)
-      const title =
-        'isLinkedChat' in entity
-          ? `${getDisplayName(entity.channel)}'s linked chat`
-          : getDisplayName(entity)
-      return {
-        label: `[${kind}] ${title}`,
-        value: String(i),
-      }
-    }),
-  })
+  )
   if (selecteds == null) process.exit(0)
 
   const seen = new Set<number>()
   for (const idx of selecteds) {
     let entity = entitiesWithLink[Number(idx)]
-    if ('isLinkedChat' in entity) {
-      const linkedChat = await getLinkedChat(core, entity.channel)
-      if (!linkedChat) {
-        consola.warn('No linked chat found for', getDisplayName(entity.channel))
+    if ('linkedType' in entity) {
+      if (entity.linkedType === 'chat') {
+        const linkedChat = await getLinkedChat(core, entity.channel)
+        if (!linkedChat) {
+          consola.warn(
+            'No linked chat found for',
+            getDisplayName(entity.channel),
+          )
+          continue
+        }
+        entity = linkedChat
+      } else {
         continue
       }
-      entity = linkedChat
     }
 
     if (seen.has(entity.id.valueOf())) {
