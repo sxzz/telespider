@@ -61,6 +61,16 @@ async function registerGroup(core: Core, entity: Entity) {
   }
 
   if (getEntityType(entity) === 'channel') {
+    if ('linkedMonoforumId' in entity && entity.linkedMonoforumId) {
+      const monoforum = await core.client
+        .getEntity(entity.linkedMonoforumId)
+        .catch(() => null)
+      if (monoforum) {
+        await registerEntities(core, [monoforum])
+        await registerGroup(core, monoforum)
+      }
+    }
+
     const result = await core.client.invoke(
       new Api.channels.GetFullChannel({ channel: entity }),
     )
