@@ -102,7 +102,7 @@ export async function msg({ type = 'all' }: { type?: EntityType }) {
         }
         entity = linkedChat
       } else {
-        continue
+        entity = await core.client.getEntity(entity.channel.linkedMonoforumId!)
       }
     }
 

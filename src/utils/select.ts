@@ -13,7 +13,6 @@ export async function select<T>(
   return await _select({
     message,
     required: true,
-    clearInputWhenSelected: true,
     inputDelay: 0,
     canToggleAll: true,
     loop: true,
@@ -24,8 +23,8 @@ export async function select<T>(
     },
     theme: {
       style: {
-        renderSelectedOptions() {
-          return ''
+        renderSelectedOptions(selectedOptions: any, allOptions: any) {
+          return `Selected: ${selectedOptions.length} / ${allOptions.length}`
         },
       },
     },
