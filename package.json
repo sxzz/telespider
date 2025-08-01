@@ -1,7 +1,7 @@
 {
   "name": "telespider",
   "version": "0.0.0",
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@10.14.0",
   "description": "undefined",
   "type": "module",
   "license": "MIT",
@@ -48,7 +48,7 @@
     "debug": "^4.4.1",
     "defu": "^6.1.4",
     "dotenv": "^17.2.1",
-    "drizzle-orm": "^0.44.3",
+    "drizzle-orm": "^0.44.4",
     "fuse.js": "^7.1.0",
     "inquirer-select-pro": "1.0.0-alpha.9",
     "meilisearch": "^0.51.0",
@@ -57,19 +57,19 @@
     "unconfig": "^7.3.2"
   },
   "devDependencies": {
-    "@sxzz/eslint-config": "^7.0.6",
+    "@sxzz/eslint-config": "^7.1.2",
     "@sxzz/prettier-config": "^2.2.3",
     "@types/debug": "^4.1.12",
     "@types/node": "^24.1.0",
-    "@types/pg": "^8.15.4",
-    "bumpp": "^10.2.0",
+    "@types/pg": "^8.15.5",
+    "bumpp": "^10.2.2",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9.32.0",
     "prettier": "^3.6.2",
-    "tsdown": "^0.13.0",
+    "tsdown": "^0.13.1",
     "tsx": "^4.20.3",
     "type-fest": "^4.41.0",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
   "engines": {
