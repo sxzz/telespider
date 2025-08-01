@@ -6,6 +6,7 @@ import {
   addAllEntityParticipants,
   registerEntities,
 } from '../../services/entity'
+import { select } from '../../utils/select'
 import { initCli } from '../init'
 import type { Core } from '../../core'
 import type { Entity } from 'teleproto/define'
@@ -26,13 +27,14 @@ export async function meta({ type = 'all' }: { type?: EntityType }) {
   const groups = entities.filter(
     (ent) => getEntityType(ent) !== 'user' && getEntityType(ent) !== 'bot',
   )
-  const selecteds = await consola.prompt('Select groups and channels', {
-    type: 'multiselect',
-    options: groups.map((grp, i) => ({
-      label: getDisplayName(grp),
+  const selecteds = await select(
+    'Select groups and channels',
+    groups.map((grp, i) => ({
+      name: getDisplayName(grp),
       value: String(i),
     })),
-  })
+  )
+  if (!selecteds) return
   const selectedGroups = selecteds.map((i) => groups[Number(i)])
   await p
   for (const entity of selectedGroups) {
