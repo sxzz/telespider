@@ -45,8 +45,8 @@ importers:
         specifier: ^8.16.3
         version: 8.16.3
       teleproto:
-        specifier: ^214.1.7
-        version: 214.1.7
+        specifier: ^1.214.1
+        version: 1.214.1
       unconfig:
         specifier: ^7.3.3
         version: 7.3.3
@@ -2753,9 +2753,8 @@ packages:
     resolution: {integrity: sha512-ZL6DDuAlRlLGghwcfmSn9sK3Hr6ArtyudlSAiCqQ6IfE+b+HHbydbYDIG15IfS5do+7XQQBdBiubF/cV2dnDzg==}
     engines: {node: '>=6'}
 
-  teleproto@214.1.7:
-    resolution: {integrity: sha512-nlB0Jlsi1TyiGkVeaBN8uDtfs1kbqPMebOLq0lDCh5Ub1Ueo+v8zMmqdQJZLXIhXFpyKWfTKXd7W+jXVtDnd7Q==}
-    deprecated: Old versioning scheme is deprecated. Please migrate to ^1.214.0. The layer is still the same (214), only the versioning has changed.
+  teleproto@1.214.1:
+    resolution: {integrity: sha512-n5Ut7X4RAivoBe0OPgtp/ilurheAeZMnoWWb9LZIxOfIbopJDizYhjFjiM0sbBCP8VSeOomaf2ngQ9LOjBW6AQ==}
 
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
@@ -5750,7 +5749,7 @@ snapshots:
 
   tapable@2.2.3: {}
 
-  teleproto@214.1.7:
+  teleproto@1.214.1:
     dependencies:
       async-mutex: 0.3.2
       big-integer: 1.6.52
