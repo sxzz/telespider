@@ -58,11 +58,7 @@ export async function msg({ type = 'all' }: { type?: EntityType }) {
     entitiesWithLink.map((entity, i) => {
       let kind: EntityType
       if ('linkedType' in entity) {
-        if (entity.linkedType === 'chat') {
-          kind = 'channel'
-        } else {
-          kind = 'chat'
-        }
+        kind = entity.linkedType === 'chat' ? 'channel' : 'chat'
       } else {
         kind = getEntityType(entity)
       }

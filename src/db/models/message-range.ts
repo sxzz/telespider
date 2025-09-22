@@ -27,9 +27,9 @@ export async function getMessageRange(
       .where(
         and(
           eq(messageRangeTable.peerId, peerId),
-          peerOwnerId != null
-            ? eq(messageRangeTable.peerOwnerId, peerOwnerId)
-            : undefined,
+          peerOwnerId == null
+            ? undefined
+            : eq(messageRangeTable.peerOwnerId, peerOwnerId),
         ),
       )
   )[0]

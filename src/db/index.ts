@@ -25,16 +25,16 @@ export async function initMeiliSearch() {
   indexer = ms.index<models.DbMessageInsert>('messages')
   const filterableAttrs = (
     (await indexer.getFilterableAttributes()) || []
-  ).sort()
-  const sortableAttrs = (await indexer.getSortableAttributes()).sort()
+  ).toSorted()
+  const sortableAttrs = (await indexer.getSortableAttributes()).toSorted()
 
   const expectedFilterableAttrs = [
     'peerName',
     'fromUserDisplayName',
     'fwdFromName',
     'raw.fromId.className',
-  ].sort()
-  const expectedSortableAttrs = ['sentAt', 'fwdFromDate'].sort()
+  ].toSorted()
+  const expectedSortableAttrs = ['sentAt', 'fwdFromDate'].toSorted()
   const tasks: EnqueuedTask[] = []
   if (
     JSON.stringify(filterableAttrs) !== JSON.stringify(expectedFilterableAttrs)
