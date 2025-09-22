@@ -2,13 +2,17 @@ import { writeFile } from 'node:fs/promises'
 import process from 'node:process'
 import { underline } from 'ansis'
 import consola from 'consola'
-import { loadConfig } from '../config'
-import { createCore } from '../core'
+import { loadConfig, type ConfigResolved } from '../config'
+import { createCore, type Core } from '../core'
 import { initDb, initMeiliSearch } from '../db'
 
 consola.options.formatOptions.date = false
 
-export async function initCli() {
+export async function initCli(): Promise<{
+  config: ConfigResolved
+  core: Core
+  [Symbol.asyncDispose]: () => Promise<void>
+}> {
   const config = await loadConfig()
   await initDb()
   await initMeiliSearch()
