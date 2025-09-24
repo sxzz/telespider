@@ -41,7 +41,11 @@ export class Core {
       this.session,
       this.options.apiId,
       this.options.apiHash,
-      { baseLogger: logger },
+      {
+        baseLogger: logger,
+        connectionRetries: 3,
+        useWSS: true,
+      },
     )
     this.authParams = {
       phoneNumber: options.phoneNumber,
