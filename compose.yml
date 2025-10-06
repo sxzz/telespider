@@ -1,7 +1,7 @@
 services:
   meilisearch:
     container_name: meilisearch
-    image: getmeili/meilisearch:v1.22.0
+    image: getmeili/meilisearch:v1.22.2
     environment:
       - http_proxy
       - https_proxy
