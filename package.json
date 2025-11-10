@@ -1,7 +1,7 @@
 {
   "name": "telespider",
   "version": "0.0.0",
-  "packageManager": "pnpm@10.20.0",
+  "packageManager": "pnpm@10.21.0",
   "description": "undefined",
   "type": "module",
   "license": "MIT",
@@ -54,7 +54,7 @@
     "meilisearch": "^0.54.0",
     "pg": "^8.16.3",
     "teleproto": "^1.216.1",
-    "unconfig": "^7.3.3"
+    "unconfig": "^7.4.0"
   },
   "devDependencies": {
     "@sxzz/eslint-config": "^7.2.8",
@@ -64,13 +64,13 @@
     "@types/pg": "^8.15.6",
     "bumpp": "^10.3.1",
     "drizzle-kit": "^0.31.6",
-    "eslint": "^9.39.0",
+    "eslint": "^9.39.1",
     "prettier": "^3.6.2",
-    "tsdown": "^0.15.12",
+    "tsdown": "^0.16.1",
     "tsx": "^4.20.6",
-    "type-fest": "^5.1.0",
+    "type-fest": "^5.2.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.6"
+    "vitest": "^4.0.8"
   },
   "engines": {
     "node": ">=20.18.0"
