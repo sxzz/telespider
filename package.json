@@ -43,7 +43,7 @@
   "dependencies": {
     "ansis": "^4.2.0",
     "big-integer": "^1.6.52",
-    "cac": "^6.7.14",
+    "cac": "^7.0.0",
     "consola": "^3.4.2",
     "debug": "^4.4.3",
     "defu": "^6.1.4",
