@@ -48,7 +48,7 @@
     "debug": "^4.4.3",
     "defu": "^6.1.4",
     "dotenv": "^17.2.3",
-    "drizzle-orm": "^0.44.7",
+    "drizzle-orm": "^0.45.0",
     "fuse.js": "^7.1.0",
     "inquirer-select-pro": "1.0.0-alpha.9",
     "meilisearch": "^0.54.0",
