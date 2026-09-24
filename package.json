@@ -1,7 +1,7 @@
 {
   "name": "telespider",
   "version": "0.0.0",
-  "packageManager": "pnpm@10.21.0",
+  "packageManager": "pnpm@12.6.0",
   "description": "undefined",
   "type": "module",
   "license": "MIT",
