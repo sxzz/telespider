@@ -47,7 +47,7 @@
     "consola": "^3.4.2",
     "debug": "^4.4.3",
     "defu": "^6.1.4",
-    "dotenv": "^17.2.3",
+    "dotenv": "^18.0.0",
     "drizzle-orm": "^0.44.7",
     "fuse.js": "^7.1.0",
     "inquirer-select-pro": "1.0.0-alpha.9",
